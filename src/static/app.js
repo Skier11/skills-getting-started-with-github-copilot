@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const participantsList = document.getElementById("participants-list");
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -66,6 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+
+        // Refresh the activities list dynamically
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -84,6 +88,43 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error signing up:", error);
     }
   });
+
+  // Function to add a participant to the list
+  function addParticipant(name) {
+    const listItem = document.createElement("li");
+    listItem.textContent = name;
+
+    const deleteIcon = document.createElement("span");
+    deleteIcon.textContent = "❌";
+    deleteIcon.style.cursor = "pointer";
+    deleteIcon.style.marginLeft = "10px";
+
+    deleteIcon.addEventListener("click", () => {
+      unregisterParticipant(name);
+      listItem.remove();
+    });
+
+    listItem.appendChild(deleteIcon);
+    participantsList.appendChild(listItem);
+  }
+
+  // Function to unregister a participant
+  async function unregisterParticipant(name) {
+    try {
+      const response = await fetch(`/participants/${encodeURIComponent(name)}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to unregister participant");
+      }
+    } catch (error) {
+      console.error("Error unregistering participant:", error);
+    }
+  }
+
+  // Example: Add participants dynamically (replace with actual data)
+  ["John Doe", "Jane Smith"].forEach(addParticipant);
 
   // Initialize app
   fetchActivities();
